@@ -5,14 +5,6 @@
 :root {
   --color-light: #ffffff;
   --color-dark: #171717;
-  --hero-navy: #2C3F52;
-  --primary-green: #4A9B6C;
-  --primary-green-hover: #3D8159;
-  --light-gray-bg: #F7F9FC;
-  --card-bg: #ffffff;
-  --border-gray: #E5E7EB;
-  --text-dark: #1F2937;
-  --text-gray: #6B7280;
 }
 
 .accent-text {
@@ -37,7 +29,7 @@ body {
     "Segoe UI Symbol",
     "Noto Color Emoji";
   color: var(--color-dark);
-  background: var(--light-gray-bg);
+  background: var(--color-light);
 }
 
 /* only use this to update the style of the auth input fields. use a different class for all other input fields */
