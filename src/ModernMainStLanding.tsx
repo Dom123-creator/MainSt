@@ -4,12 +4,21 @@ import { ToolModal } from "./components/ToolModal";
 import { SubscriptionSection } from "./components/SubscriptionSection";
 import { ProfileSubscriptionModal } from "./components/ProfileSubscriptionModal";
 import { problemTools, techRyboksTools } from "./data/mockData";
+import { useFavorites } from "./contexts/FavoritesContext";
+import { useComparison } from "./contexts/ComparisonContext";
+import { toast } from "sonner";
+
+type SortOption = "default" | "setupTime" | "name" | "popular";
 
 export function ModernMainStLanding() {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("default");
+  const { toggleFavorite, isFavorite, favorites} = useFavorites();
+  const { addToComparison, removeFromComparison, isInComparison, canAddMore } = useComparison();
 
   const allTools = [...problemTools, ...techRyboksTools];
 
@@ -23,6 +32,12 @@ export function ModernMainStLanding() {
 
   // Filter tools
   let filteredTools = allTools;
+
+  // Show only favorites if filter is active
+  if (showOnlyFavorites) {
+    filteredTools = filteredTools.filter(tool => isFavorite(tool.id));
+  }
+
   if (selectedFilters.length > 0) {
     filteredTools = filteredTools.filter(tool =>
       tool.category && selectedFilters.includes(tool.category)
@@ -33,6 +48,27 @@ export function ModernMainStLanding() {
       tool.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tool.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
+  }
+
+  // Sort tools
+  if (sortBy === "name") {
+    filteredTools = [...filteredTools].sort((a, b) => a.title.localeCompare(b.title));
+  } else if (sortBy === "setupTime") {
+    filteredTools = [...filteredTools].sort((a, b) => {
+      const parseTime = (time: string | undefined) => {
+        if (!time) return 999;
+        const match = time.match(/(\d+)/);
+        return match ? parseInt(match[1]) : 999;
+      };
+      return parseTime(a.setupTime) - parseTime(b.setupTime);
+    });
+  } else if (sortBy === "popular") {
+    filteredTools = [...filteredTools].sort((a, b) => {
+      // Put PRO tools first as they're typically more popular
+      if (a.isPro && !b.isPro) return -1;
+      if (!a.isPro && b.isPro) return 1;
+      return 0;
+    });
   }
 
   const categories = [
@@ -114,6 +150,20 @@ export function ModernMainStLanding() {
                   {cat.label}
                 </button>
               ))}
+
+              {/* Favorites Filter Button */}
+              <button
+                onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  showOnlyFavorites
+                    ? 'bg-red-500 text-white'
+                    : 'bg-white border border-gray-300 text-gray-700 hover:border-red-500'
+                }`}
+              >
+                <span className="mr-2">❤️</span>
+                Favorites {favorites.length > 0 && `(${favorites.length})`}
+              </button>
+
               {selectedFilters.length > 0 && (
                 <button
                   onClick={() => setSelectedFilters([])}
@@ -142,13 +192,33 @@ export function ModernMainStLanding() {
       {/* Tools Grid - Clean Card Design */}
       <div className="max-w-6xl mx-auto px-6 py-16">
         {/* Section Header */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">
-            {filteredTools.length} AI Tools for Growth
-          </h2>
-          <p className="text-gray-600">
-            Click any tool to see detailed implementation guides and proven strategies
-          </p>
+        <div className="mb-12 flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+              {filteredTools.length} AI Tools for Growth
+            </h2>
+            <p className="text-gray-600">
+              Click any tool to see detailed implementation guides and proven strategies
+            </p>
+          </div>
+
+          {/* Sort Dropdown */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="sort" className="text-sm font-medium text-gray-700">
+              Sort by:
+            </label>
+            <select
+              id="sort"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent cursor-pointer"
+            >
+              <option value="default">Default</option>
+              <option value="name">Name (A-Z)</option>
+              <option value="setupTime">Setup Time (Fastest)</option>
+              <option value="popular">Most Popular</option>
+            </select>
+          </div>
         </div>
 
         {/* Tools Grid */}
@@ -166,6 +236,33 @@ export function ModernMainStLanding() {
                 onClick={() => handleToolClick(tool.id)}
                 className="group relative bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-900 hover:shadow-lg transition-all cursor-pointer"
               >
+                {/* Favorite Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFavorite(tool.id);
+                  }}
+                  className="absolute top-4 left-4 z-10 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label={isFavorite(tool.id) ? "Remove from favorites" : "Add to favorites"}
+                >
+                  <svg
+                    className={`w-6 h-6 transition-colors ${
+                      isFavorite(tool.id)
+                        ? "fill-red-500 text-red-500"
+                        : "fill-none text-gray-400 hover:text-red-500"
+                    }`}
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                </button>
+
                 {/* Pro Badge */}
                 {tool.isPro && (
                   <div className="absolute top-4 right-4">
@@ -174,6 +271,37 @@ export function ModernMainStLanding() {
                     </span>
                   </div>
                 )}
+
+                {/* Comparison Checkbox */}
+                <div className="absolute bottom-4 left-4 z-10">
+                  <label
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex items-center gap-2 cursor-pointer group/checkbox"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isInComparison(tool.id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        if (e.target.checked) {
+                          const added = addToComparison(tool);
+                          if (!added) {
+                            toast.error("Maximum 3 tools can be compared at once");
+                          } else {
+                            toast.success(`${tool.title} added to comparison`);
+                          }
+                        } else {
+                          removeFromComparison(tool.id);
+                          toast.info(`${tool.title} removed from comparison`);
+                        }
+                      }}
+                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500"
+                    />
+                    <span className="text-xs text-gray-600 font-medium opacity-0 group-hover:opacity-100 group-hover/checkbox:opacity-100 transition-opacity">
+                      Compare
+                    </span>
+                  </label>
+                </div>
 
                 {/* Icon */}
                 <div className="text-4xl mb-4">{tool.icon}</div>

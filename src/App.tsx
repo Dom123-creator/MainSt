@@ -5,6 +5,10 @@ import { Toaster } from "sonner";
 import { ModernMainStLanding } from "./ModernMainStLanding";
 import { OperationsLanding } from "./OperationsLanding";
 import { TechToolsLanding } from "./TechToolsLanding";
+import { Chatbot } from "./components/Chatbot";
+import { MobileNav } from "./components/MobileNav";
+import { EmailCapturePopup } from "./components/EmailCapturePopup";
+import { ComparisonBar } from "./components/ComparisonBar";
 import { useState } from "react";
 
 type ActivePage = "growth" | "operations" | "tech-tools";
@@ -84,13 +88,13 @@ export default function App() {
               <Unauthenticated>
                 <button
                   onClick={() => setShowSignIn(true)}
-                  className="px-6 py-2 rounded-lg font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
+                  className="hidden sm:block px-6 py-2 rounded-lg font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
                 >
                   Log In
                 </button>
                 <button
                   onClick={scrollToSubscription}
-                  className="px-6 py-2 rounded-lg font-semibold text-white hover:opacity-90 transition-opacity shadow-md hover:shadow-lg"
+                  className="hidden sm:block px-6 py-2 rounded-lg font-semibold text-white hover:opacity-90 transition-opacity shadow-md hover:shadow-lg"
                   style={{ backgroundColor: 'var(--primary-green)' }}
                 >
                   Join Pro
@@ -100,11 +104,17 @@ export default function App() {
               <Authenticated>
                 <button
                   onClick={() => setShowSignIn(false)}
-                  className="px-6 py-2 rounded-lg font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
+                  className="hidden sm:block px-6 py-2 rounded-lg font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
                 >
                   Dashboard
                 </button>
               </Authenticated>
+
+              <MobileNav
+                activePage={activePage}
+                onPageChange={handlePageChange}
+                onScrollToPricing={scrollToSubscription}
+              />
             </div>
           </div>
         </div>
@@ -115,6 +125,9 @@ export default function App() {
       </main>
 
       <Toaster />
+      <Chatbot />
+      <EmailCapturePopup />
+      <ComparisonBar />
     </div>
   );
 }
