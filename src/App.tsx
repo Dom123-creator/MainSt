@@ -190,6 +190,10 @@ function Content({
     return <UserDashboard />;
   }
 
+  if (activePage === "admin") {
+    return <AdminPanel />;
+  }
+
   if (activePage === "operations") {
     return <OperationsLanding />;
   }
