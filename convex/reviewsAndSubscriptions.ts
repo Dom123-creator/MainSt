@@ -82,6 +82,38 @@ export const getToolRating = query({
   },
 });
 
+// Alias for addReview
+export const createReview = addReview;
+
+export const getAverageRating = query({
+  args: { toolId: v.string() },
+  handler: async (ctx, args) => {
+    const reviews = await ctx.db
+      .query("toolReviews")
+      .withIndex("by_tool", (q) => q.eq("toolId", args.toolId))
+      .collect();
+
+    if (reviews.length === 0) {
+      return { average: 0, count: 0, breakdown: {} };
+    }
+
+    const total = reviews.reduce((sum, review) => sum + review.rating, 0);
+    const average = total / reviews.length;
+
+    // Calculate breakdown by rating
+    const breakdown: Record<number, number> = {};
+    for (let i = 1; i <= 5; i++) {
+      breakdown[i] = reviews.filter(r => r.rating === i).length;
+    }
+
+    return {
+      average: Math.round(average * 10) / 10,
+      count: reviews.length,
+      breakdown,
+    };
+  },
+});
+
 export const markReviewHelpful = mutation({
   args: {
     reviewId: v.id("toolReviews"),

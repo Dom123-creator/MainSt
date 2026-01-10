@@ -2,6 +2,8 @@ import { useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { problemTools, techRyboksTools } from "./data/mockData";
 import { useState } from "react";
+import { exportFavoritesToCSV, exportFavoritesToPDF, exportFavoritesAsJSON } from "./utils/exportFavorites";
+import { toast } from "sonner";
 
 export function UserDashboard() {
   const [activeTab, setActiveTab] = useState<"favorites" | "progress" | "subscription">("favorites");
@@ -62,7 +64,49 @@ export function UserDashboard() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           {activeTab === "favorites" && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Favorite Tools</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Your Favorite Tools</h2>
+                {favoriteTools.length > 0 && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        exportFavoritesToCSV(favoriteTools);
+                        toast.success("Favorites exported to CSV!");
+                      }}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors text-sm flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Export CSV
+                    </button>
+                    <button
+                      onClick={() => {
+                        exportFavoritesToPDF(favoriteTools);
+                        toast.success("Favorites exported to PDF!");
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      Export PDF
+                    </button>
+                    <button
+                      onClick={() => {
+                        exportFavoritesAsJSON(favoriteTools);
+                        toast.success("Favorites exported to JSON!");
+                      }}
+                      className="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors text-sm flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                      </svg>
+                      Export JSON
+                    </button>
+                  </div>
+                )}
+              </div>
               {favoriteTools.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">❤️</div>

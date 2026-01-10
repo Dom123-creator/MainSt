@@ -1,4 +1,7 @@
 import { Tool } from "../data/mockData";
+import { SocialShare } from "./SocialShare";
+import { ToolReviews } from "./ToolReviews";
+import { useState } from "react";
 
 interface ToolModalProps {
   tool: Tool;
@@ -7,6 +10,8 @@ interface ToolModalProps {
 }
 
 export function ToolModal({ tool, onClose, onGetStarted }: ToolModalProps) {
+  const [showReviews, setShowReviews] = useState(false);
+
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
@@ -243,6 +248,42 @@ export function ToolModal({ tool, onClose, onGetStarted }: ToolModalProps) {
               </div>
             </div>
           )}
+
+          {/* Social Share Section */}
+          <div className="border-t pt-6">
+            <SocialShare
+              title={tool.title}
+              description={tool.description}
+            />
+          </div>
+
+          {/* Reviews & Ratings Section */}
+          <div className="border-t pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900">Reviews & Ratings</h3>
+              <button
+                onClick={() => setShowReviews(!showReviews)}
+                className="text-sm text-green-600 hover:text-green-700 font-semibold flex items-center gap-2"
+              >
+                {showReviews ? (
+                  <>
+                    Hide Reviews
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                  </>
+                ) : (
+                  <>
+                    Show Reviews
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </>
+                )}
+              </button>
+            </div>
+            {showReviews && <ToolReviews toolId={tool.id} />}
+          </div>
 
           <div className="flex gap-3 pt-4">
             <button

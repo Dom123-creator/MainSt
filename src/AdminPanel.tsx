@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { useState } from "react";
+import { DashboardStatSkeleton, TableSkeleton } from "./components/LoadingSkeleton";
 
 type AdminTab = "dashboard" | "subscribers" | "analytics" | "users";
 
@@ -83,6 +84,15 @@ export function AdminPanel() {
           <div className="space-y-6">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {subscriberCount === undefined || activeSubscriptions === undefined || analyticsSummary === undefined ? (
+                <>
+                  <DashboardStatSkeleton />
+                  <DashboardStatSkeleton />
+                  <DashboardStatSkeleton />
+                  <DashboardStatSkeleton />
+                </>
+              ) : (
+                <>
               {/* Total Subscribers */}
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-2">
@@ -132,6 +142,8 @@ export function AdminPanel() {
                   {analyticsSummary?.uniqueSessions || 0} sessions
                 </p>
               </div>
+                </>
+              )}
             </div>
 
             {/* Event Breakdown */}
@@ -180,7 +192,9 @@ export function AdminPanel() {
               </button>
             </div>
 
-            {allSubscribers && allSubscribers.length > 0 ? (
+            {allSubscribers === undefined ? (
+              <TableSkeleton rows={10} />
+            ) : allSubscribers.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>

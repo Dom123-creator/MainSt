@@ -7,6 +7,7 @@ import { problemTools, techRyboksTools } from "./data/mockData";
 import { useFavorites } from "./contexts/FavoritesContext";
 import { useComparison } from "./contexts/ComparisonContext";
 import { toast } from "sonner";
+import { SocialShare } from "./components/SocialShare";
 
 type SortOption = "default" | "setupTime" | "name" | "popular";
 
@@ -262,6 +263,18 @@ export function ModernMainStLanding() {
                     />
                   </svg>
                 </button>
+
+                {/* Social Share Button */}
+                <div
+                  className="absolute top-14 left-4 z-10"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <SocialShare
+                    title={tool.title}
+                    description={tool.description}
+                    compact={true}
+                  />
+                </div>
 
                 {/* Pro Badge */}
                 {tool.isPro && (
