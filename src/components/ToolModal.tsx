@@ -1,6 +1,8 @@
 import { Tool } from "../data/mockData";
 import { SocialShare } from "./SocialShare";
 import { ToolReviews } from "./ToolReviews";
+import { ROICalculator } from "./ROICalculator";
+import { ProgressTracker } from "./ProgressTracker";
 import { useState } from "react";
 
 interface ToolModalProps {
@@ -248,6 +250,25 @@ export function ToolModal({ tool, onClose, onGetStarted }: ToolModalProps) {
               </div>
             </div>
           )}
+
+          {/* ROI Calculator Section */}
+          <div className="border-t pt-6">
+            <ROICalculator
+              toolTitle={tool.title}
+              defaultHoursSaved={10}
+              defaultHourlyRate={50}
+              defaultMonthlyCost={100}
+            />
+          </div>
+
+          {/* Progress Tracker Section */}
+          <div className="border-t pt-6">
+            <ProgressTracker
+              toolId={tool.id}
+              toolTitle={tool.title}
+              toolIcon={tool.icon}
+            />
+          </div>
 
           {/* Social Share Section */}
           <div className="border-t pt-6">

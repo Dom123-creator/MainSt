@@ -11,6 +11,7 @@ import { Chatbot } from "./components/Chatbot";
 import { MobileNav } from "./components/MobileNav";
 import { EmailCapturePopup } from "./components/EmailCapturePopup";
 import { ComparisonBar } from "./components/ComparisonBar";
+import { DarkModeToggle } from "./components/DarkModeToggle";
 import { useState } from "react";
 
 type ActivePage = "growth" | "operations" | "tech-tools" | "dashboard" | "admin";
@@ -87,6 +88,9 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-4">
+              {/* Dark Mode Toggle */}
+              <DarkModeToggle />
+
               <Unauthenticated>
                 <button
                   onClick={() => setShowSignIn(true)}
