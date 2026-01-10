@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 export function EmailCapturePopup() {
   const [isVisible, setIsVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasShown, setHasShown] = useState(false);
+  const addSubscriber = useMutation(api.subscribersManagement.addSubscriber);
 
   useEffect(() => {
     // Check if user has already dismissed the popup
@@ -48,15 +51,24 @@ export function EmailCapturePopup() {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const result = await addSubscriber({ email });
 
-    // Store subscription status
-    localStorage.setItem("email-subscribed", "true");
+      if (result.success) {
+        // Store subscription status
+        localStorage.setItem("email-subscribed", "true");
 
-    toast.success("🎉 Thanks for subscribing! Check your email for your welcome gift.");
-    setIsVisible(false);
-    setIsSubmitting(false);
+        toast.success("🎉 Thanks for subscribing! Check your email for your welcome gift.");
+        setIsVisible(false);
+      } else {
+        toast.error(result.message || "Failed to subscribe");
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+      console.error("Subscription error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {

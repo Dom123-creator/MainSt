@@ -17,9 +17,13 @@ import type * as articles from "../articles.js";
 import type * as auth from "../auth.js";
 import type * as categories from "../categories.js";
 import type * as http from "../http.js";
+import type * as reviewsAndSubscriptions from "../reviewsAndSubscriptions.js";
 import type * as router from "../router.js";
 import type * as seedData from "../seedData.js";
+import type * as stripe from "../stripe.js";
 import type * as subscribers from "../subscribers.js";
+import type * as subscribersManagement from "../subscribersManagement.js";
+import type * as userDataManagement from "../userDataManagement.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -34,9 +38,13 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   categories: typeof categories;
   http: typeof http;
+  reviewsAndSubscriptions: typeof reviewsAndSubscriptions;
   router: typeof router;
   seedData: typeof seedData;
+  stripe: typeof stripe;
   subscribers: typeof subscribers;
+  subscribersManagement: typeof subscribersManagement;
+  userDataManagement: typeof userDataManagement;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

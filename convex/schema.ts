@@ -33,6 +33,80 @@ const applicationTables = {
     icon: v.string(),
     color: v.string(),
   }),
+
+  // User favorites - tracks which tools users have favorited
+  userFavorites: defineTable({
+    userId: v.id("users"),
+    toolId: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_tool", ["toolId"])
+    .index("by_user_and_tool", ["userId", "toolId"]),
+
+  // User progress - tracks implementation progress for each tool
+  userProgress: defineTable({
+    userId: v.id("users"),
+    toolId: v.string(),
+    completedSteps: v.array(v.number()),
+    totalSteps: v.number(),
+    startedAt: v.number(),
+    lastUpdated: v.number(),
+    completed: v.boolean(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_tool", ["toolId"])
+    .index("by_user_and_tool", ["userId", "toolId"]),
+
+  // Analytics events - tracks user actions
+  analyticsEvents: defineTable({
+    userId: v.optional(v.id("users")),
+    sessionId: v.string(),
+    eventType: v.string(), // "page_view", "tool_view", "tool_favorite", "tool_compare", "email_submit", etc.
+    eventData: v.optional(v.any()),
+    timestamp: v.number(),
+    page: v.optional(v.string()),
+    referrer: v.optional(v.string()),
+    userAgent: v.optional(v.string()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_event_type", ["eventType"])
+    .index("by_timestamp", ["timestamp"])
+    .index("by_session", ["sessionId"]),
+
+  // Tool reviews and ratings
+  toolReviews: defineTable({
+    userId: v.id("users"),
+    toolId: v.string(),
+    rating: v.number(), // 1-5
+    review: v.optional(v.string()),
+    verified: v.boolean(),
+    helpful: v.number(),
+    notHelpful: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_tool", ["toolId"])
+    .index("by_user", ["userId"])
+    .index("by_rating", ["rating"])
+    .index("by_created", ["createdAt"]),
+
+  // Payments and subscriptions
+  subscriptions: defineTable({
+    userId: v.id("users"),
+    plan: v.string(), // "free", "pro", "enterprise"
+    status: v.string(), // "active", "cancelled", "expired", "trial"
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
+    currentPeriodStart: v.number(),
+    currentPeriodEnd: v.number(),
+    cancelAtPeriodEnd: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_stripe_customer", ["stripeCustomerId"])
+    .index("by_status", ["status"]),
 };
 
 export default defineSchema({

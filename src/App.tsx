@@ -5,13 +5,15 @@ import { Toaster } from "sonner";
 import { ModernMainStLanding } from "./ModernMainStLanding";
 import { OperationsLanding } from "./OperationsLanding";
 import { TechToolsLanding } from "./TechToolsLanding";
+import { UserDashboard } from "./UserDashboard";
+import { AdminPanel } from "./AdminPanel";
 import { Chatbot } from "./components/Chatbot";
 import { MobileNav } from "./components/MobileNav";
 import { EmailCapturePopup } from "./components/EmailCapturePopup";
 import { ComparisonBar } from "./components/ComparisonBar";
 import { useState } from "react";
 
-type ActivePage = "growth" | "operations" | "tech-tools";
+type ActivePage = "growth" | "operations" | "tech-tools" | "dashboard" | "admin";
 
 export default function App() {
   const [showSignIn, setShowSignIn] = useState(false);
@@ -103,10 +105,16 @@ export default function App() {
 
               <Authenticated>
                 <button
-                  onClick={() => setShowSignIn(false)}
+                  onClick={() => handlePageChange("dashboard")}
                   className="hidden sm:block px-6 py-2 rounded-lg font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
                 >
                   Dashboard
+                </button>
+                <button
+                  onClick={() => handlePageChange("admin")}
+                  className="hidden sm:block px-4 py-2 rounded-lg font-semibold text-white bg-gradient-to-r from-purple-500 to-purple-600 hover:shadow-lg transition-all"
+                >
+                  Admin
                 </button>
               </Authenticated>
 
@@ -174,6 +182,10 @@ function Content({
   }
 
   // Render the appropriate landing page based on active page
+  if (activePage === "dashboard") {
+    return <UserDashboard />;
+  }
+
   if (activePage === "operations") {
     return <OperationsLanding />;
   }
