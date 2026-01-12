@@ -26,12 +26,18 @@ export default function App() {
 
 
   const handlePageChange = (page: ActivePage) => {
+    console.log('Navigating to page:', page);
     setActivePage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--light-gray-bg)' }}>
+      {/* Debug indicator - remove after testing */}
+      <div className="fixed top-20 right-4 z-50 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg text-sm">
+        Current Page: <strong>{activePage}</strong>
+      </div>
+
       <header className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center h-20">
