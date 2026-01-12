@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { Authenticated, Unauthenticated } from "convex/react";
 
-type ActivePage = "growth" | "operations" | "tech-tools";
+type ActivePage = "growth" | "operations" | "tech-tools" | "dashboard" | "admin" | "newsletter" | "settings";
 
 interface MobileNavProps {
   activePage: ActivePage;
@@ -124,12 +125,59 @@ export function MobileNav({ activePage, onPageChange, onScrollToPricing }: Mobil
               🛠️ Tech & Tools
             </button>
             <button
+              onClick={() => handlePageChange("newsletter")}
+              className={`text-left px-4 py-3 rounded-lg font-medium transition-all ${
+                activePage === "newsletter"
+                  ? "bg-green-50 text-green-600 border-l-4 border-green-600"
+                  : "text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              📰 Newsletter
+            </button>
+            <button
               onClick={handlePricingClick}
               className="text-left px-4 py-3 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-all"
             >
               💰 Pricing
             </button>
           </nav>
+
+          {/* Authenticated User Links */}
+          <Authenticated>
+            <div className="my-6 border-t border-gray-200"></div>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => handlePageChange("dashboard")}
+                className={`text-left px-4 py-3 rounded-lg font-medium transition-all ${
+                  activePage === "dashboard"
+                    ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                📊 Dashboard
+              </button>
+              <button
+                onClick={() => handlePageChange("admin")}
+                className={`text-left px-4 py-3 rounded-lg font-medium transition-all ${
+                  activePage === "admin"
+                    ? "bg-purple-50 text-purple-600 border-l-4 border-purple-600"
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                👑 Admin
+              </button>
+              <button
+                onClick={() => handlePageChange("settings")}
+                className={`text-left px-4 py-3 rounded-lg font-medium transition-all ${
+                  activePage === "settings"
+                    ? "bg-gray-50 text-gray-700 border-l-4 border-gray-700"
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                ⚙️ Settings
+              </button>
+            </div>
+          </Authenticated>
 
           {/* Divider */}
           <div className="my-6 border-t border-gray-200"></div>
