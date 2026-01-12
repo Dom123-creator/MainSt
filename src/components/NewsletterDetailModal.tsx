@@ -833,33 +833,24 @@ Conversation logs are goldmines of insights.
 ## Sample Conversation Flows
 
 ### Lead Qualification Flow
-```
-Bot: Hi! I'm Alex, your AI assistant. What brings you here today?
-User: Looking for pricing info
-Bot: I'd be happy to help! Are you looking for [Product A], [Product B], or something else?
-User: Product A
-Bot: Great choice! Product A starts at $X. What size business are you?
-User: 25 employees
-Bot: Perfect! For 25 employees, I'd recommend our Pro plan at $Y/month.
-     Would you like me to:
-     1. Schedule a demo
-     2. Start a free trial
-     3. Chat with our team
-```
+
+**Example conversation:**
+- Bot: Hi! I'm Alex, your AI assistant. What brings you here today?
+- User: Looking for pricing info
+- Bot: I'd be happy to help! Are you looking for Product A, Product B, or something else?
+- User: Product A
+- Bot: Great choice! Product A starts at $X. What size business are you?
+- User: 25 employees
+- Bot: Perfect! For 25 employees, I'd recommend our Pro plan at $Y/month. Would you like me to: (1) Schedule a demo (2) Start a free trial (3) Chat with our team
 
 ### Support Flow
-```
-Bot: Hi! Need help with something?
-User: My order hasn't arrived
-Bot: I'm sorry to hear that! Let me help. Do you have your order number?
-User: Yes, it's #12345
-Bot: Thanks! [Checking...] Order #12345 was shipped on [date] via [carrier].
-     Tracking shows it's currently in [location], expected delivery [date].
-     Would you like me to:
-     1. Send tracking details to your email
-     2. Connect you with our shipping team
-     3. Something else
-```
+
+**Example conversation:**
+- Bot: Hi! Need help with something?
+- User: My order hasn't arrived
+- Bot: I'm sorry to hear that! Let me help. Do you have your order number?
+- User: Yes, it's #12345
+- Bot: Thanks! Order #12345 was shipped on [date] via [carrier]. Tracking shows it's currently in [location], expected delivery [date]. Would you like me to: (1) Send tracking details to your email (2) Connect you with our shipping team (3) Something else
 
 ## ROI Calculation
 
