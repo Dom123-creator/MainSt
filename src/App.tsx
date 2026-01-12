@@ -24,12 +24,6 @@ export default function App() {
   const [showSubscription, setShowSubscription] = useState(false);
   const [activePage, setActivePage] = useState<ActivePage>("growth");
 
-  const scrollToSubscription = () => {
-    const subscriptionSection = document.querySelector('#subscription-section');
-    if (subscriptionSection) {
-      subscriptionSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
 
   const handlePageChange = (page: ActivePage) => {
     setActivePage(page);
@@ -92,12 +86,6 @@ export default function App() {
                 >
                   Newsletter
                 </button>
-                <button
-                  onClick={scrollToSubscription}
-                  className="text-gray-700 hover:text-gray-900 font-medium hover:border-b-2 hover:border-gray-300 pb-1 transition-all"
-                >
-                  Pricing
-                </button>
               </nav>
             </div>
 
@@ -118,11 +106,11 @@ export default function App() {
                   Log In
                 </button>
                 <button
-                  onClick={scrollToSubscription}
+                  onClick={() => setShowSignIn(true)}
                   className="hidden sm:block px-6 py-2 rounded-lg font-semibold text-white hover:opacity-90 transition-opacity shadow-md hover:shadow-lg"
                   style={{ backgroundColor: 'var(--primary-green)' }}
                 >
-                  Join Pro
+                  Sign Up
                 </button>
               </Unauthenticated>
 
@@ -154,7 +142,6 @@ export default function App() {
               <MobileNav
                 activePage={activePage}
                 onPageChange={handlePageChange}
-                onScrollToPricing={scrollToSubscription}
               />
             </div>
           </div>

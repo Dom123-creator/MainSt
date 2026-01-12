@@ -6,19 +6,13 @@ type ActivePage = "growth" | "operations" | "tech-tools" | "dashboard" | "admin"
 interface MobileNavProps {
   activePage: ActivePage;
   onPageChange: (page: ActivePage) => void;
-  onScrollToPricing: () => void;
 }
 
-export function MobileNav({ activePage, onPageChange, onScrollToPricing }: MobileNavProps) {
+export function MobileNav({ activePage, onPageChange }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handlePageChange = (page: ActivePage) => {
     onPageChange(page);
-    setIsOpen(false);
-  };
-
-  const handlePricingClick = () => {
-    onScrollToPricing();
     setIsOpen(false);
   };
 
@@ -133,12 +127,6 @@ export function MobileNav({ activePage, onPageChange, onScrollToPricing }: Mobil
               }`}
             >
               📰 Newsletter
-            </button>
-            <button
-              onClick={handlePricingClick}
-              className="text-left px-4 py-3 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-all"
-            >
-              💰 Pricing
             </button>
           </nav>
 

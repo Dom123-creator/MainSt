@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { NewsletterDetailModal } from "./NewsletterDetailModal";
 
 interface Newsletter {
   id: string;
@@ -62,6 +63,7 @@ const mockNewsletters: Newsletter[] = [
 export function NewsletterArchive() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedNewsletter, setSelectedNewsletter] = useState<Newsletter | null>(null);
 
   const categories = ["all", "Cost Savings", "HVAC", "Legal", "Accounting", "Operations"];
 
@@ -157,6 +159,7 @@ export function NewsletterArchive() {
               {featuredNewsletters.map((newsletter) => (
                 <div
                   key={newsletter.id}
+                  onClick={() => setSelectedNewsletter(newsletter)}
                   className="bg-gradient-to-br from-green-50 to-blue-50 border-2 border-green-200 rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer group"
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -190,7 +193,7 @@ export function NewsletterArchive() {
                         year: "numeric",
                       })}
                     </span>
-                    <button className="text-green-600 font-semibold hover:text-green-700 flex items-center gap-1 group-hover:gap-2 transition-all">
+                    <span className="text-green-600 font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
                       Read More
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
@@ -200,7 +203,7 @@ export function NewsletterArchive() {
                           d="M9 5l7 7-7 7"
                         />
                       </svg>
-                    </button>
+                    </span>
                   </div>
                 </div>
               ))}
@@ -216,6 +219,7 @@ export function NewsletterArchive() {
               {regularNewsletters.map((newsletter) => (
                 <div
                   key={newsletter.id}
+                  onClick={() => setSelectedNewsletter(newsletter)}
                   className="bg-white border border-gray-200 rounded-xl p-6 hover:border-green-500 hover:shadow-md transition-all cursor-pointer group"
                 >
                   <div className="flex items-start justify-between gap-6">
@@ -241,9 +245,12 @@ export function NewsletterArchive() {
                       <p className="text-gray-600 line-clamp-2">{newsletter.excerpt}</p>
                     </div>
 
-                    <button className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors whitespace-nowrap">
+                    <div className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium group-hover:bg-green-700 transition-colors whitespace-nowrap flex items-center gap-2">
                       Read
-                    </button>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -280,6 +287,14 @@ export function NewsletterArchive() {
           </button>
         </div>
       </div>
+
+      {/* Newsletter Detail Modal */}
+      {selectedNewsletter && (
+        <NewsletterDetailModal
+          newsletter={selectedNewsletter}
+          onClose={() => setSelectedNewsletter(null)}
+        />
+      )}
     </div>
   );
 }
