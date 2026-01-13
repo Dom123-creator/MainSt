@@ -188,13 +188,17 @@ export const getAnalytics = query({
     eventType: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let query = ctx.db.query("analyticsEvents");
+    let events;
 
     if (args.eventType) {
-      query = query.withIndex("by_event_type", (q) => q.eq("eventType", args.eventType));
+      const eventType = args.eventType;
+      events = await ctx.db
+        .query("analyticsEvents")
+        .withIndex("by_event_type", (q) => q.eq("eventType", eventType))
+        .collect();
+    } else {
+      events = await ctx.db.query("analyticsEvents").collect();
     }
-
-    let events = await query.collect();
 
     // Filter by date range if provided
     if (args.startDate) {
