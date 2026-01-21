@@ -1,51 +1,70 @@
 # Audio Narration Setup Guide
 
-## Natural Human Voice with ElevenLabs
+## Ultra-Natural Human Voice
 
-The "Turn Website Visitors into Leads" tool includes an audio narration feature with a natural-sounding human voice.
+The "Turn Website Visitors into Leads" tool includes an audio narration feature with an incredibly natural-sounding human voice.
 
 ### Features:
-- 🎙️ **Natural Male Voice** - Sounds like a friendly guy in his mid-30s
-- ⏯️ **Full Controls** - Play, pause, stop, and seek through audio
+- 🎙️ **Premium Natural Voice** - Sounds exactly like a real person (mid-30s, conversational)
+- ⏯️ **Full Audio Controls** - Play, pause, stop, and seek through audio
 - 📊 **Progress Tracking** - Visual progress bar with time display
-- 🔄 **Smart Fallback** - Uses browser TTS if API key not configured
+- 🎯 **3-Tier System** - Pre-generated file → API → Browser TTS
+- ✨ **Always Works** - Smart fallback ensures audio always plays
 
 ---
 
-## Setup Instructions
+## Setup Instructions (Choose One)
 
-### Option 1: Use ElevenLabs API (Recommended - Best Quality)
+### Option 1: Pre-Generate Audio File (RECOMMENDED - Best Quality & Free)
 
-1. **Sign Up for ElevenLabs** (Free Tier Available)
+Generate audio once, use forever. No API calls, instant loading, perfect quality every time!
+
+1. **Get ElevenLabs API Key** (One-time setup)
    - Visit: https://elevenlabs.io
-   - Create a free account
-   - Free tier includes: **10,000 characters/month**
+   - Create free account
+   - Get API key from Profile Settings
+   - Free tier: 10,000 chars/month (enough for this!)
 
-2. **Get Your API Key**
-   - Go to your Profile Settings
-   - Navigate to API Keys section
-   - Click "Create API Key"
-   - Copy the key
-
-3. **Add to Your Environment**
-   - Open `.env.local` file in the project root
-   - Find the line: `VITE_ELEVENLABS_API_KEY=your_elevenlabs_api_key_here`
-   - Replace with your actual key: `VITE_ELEVENLABS_API_KEY=sk_xxxxxxxxxxxxx`
-   - Save the file
-
-4. **Restart Dev Server**
+2. **Add API Key to .env.local**
    ```bash
-   # Stop the current server (Ctrl+C)
-   npm run dev
+   VITE_ELEVENLABS_API_KEY=your_actual_key_here
    ```
 
-5. **Test the Voice**
-   - Navigate to Growth page
-   - Click "Turn Website Visitors into Leads" tool
-   - Click the Play button on the audio guide
-   - You should hear a natural human voice!
+3. **Generate the Audio File**
+   ```bash
+   npm run generate:audio
+   ```
 
-### Option 2: Use Browser TTS (No Setup Required)
+   This creates: `public/audio/visitor-conversion-guide.mp3`
+
+4. **Done!** 🎉
+   - Audio file is now permanent
+   - No more API calls needed
+   - Instant loading every time
+   - Perfect quality always
+
+**Why This is Best:**
+- ✅ Generate once, use forever
+- ✅ No API quota usage after generation
+- ✅ Faster loading (no API delay)
+- ✅ Works offline
+- ✅ Studio-quality audio
+- ✅ No recurring costs
+
+---
+
+### Option 2: Use ElevenLabs API Directly (On-Demand Generation)
+
+If you prefer dynamic generation (generates audio on each page load):
+
+1. Add API key to `.env.local` (see Option 1, step 1-2)
+2. Don't run the generate script
+3. Audio will be generated via API each time
+4. Uses your API quota on each play
+
+---
+
+### Option 3: Use Browser TTS (No Setup Required)
 
 If you don't add an ElevenLabs API key, the component automatically falls back to your browser's built-in Text-to-Speech engine.
 
@@ -63,12 +82,14 @@ If you don't add an ElevenLabs API key, the component automatically falls back t
 
 ## Voice Characteristics
 
-### ElevenLabs Voice (Adam)
+### ElevenLabs Voice (Drew)
 - **Age**: Mid-30s
-- **Tone**: Relaxed, friendly, conversational
+- **Tone**: Ultra-relaxed, conversational, natural
 - **Accent**: American English
-- **Style**: Blue collar, approachable
-- **Quality**: Studio-quality audio
+- **Style**: Friendly coworker explaining tech simply
+- **Model**: Multilingual V2 (most natural model)
+- **Quality**: Studio-quality, sounds exactly like a real person
+- **Settings**: Low stability (0.4), high expressiveness (0.6)
 
 ### Browser TTS Fallback
 - **Voice**: Best available male voice on your system

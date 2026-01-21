@@ -14,53 +14,71 @@ export function AudioNarration({ text, autoPlay = false }: AudioNarrationProps) 
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Generate audio using ElevenLabs API (or fallback to browser TTS)
+  // Load or generate audio
   useEffect(() => {
-    const generateAudio = async () => {
+    const loadAudio = async () => {
       try {
         setIsLoading(true);
 
-        // Try ElevenLabs API first for natural voice
-        // Using a free voice ID for "Adam" - a natural male voice
-        const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
-
-        if (ELEVENLABS_API_KEY) {
-          // ElevenLabs API - Natural human voice
-          const response = await fetch(
-            'https://api.elevenlabs.io/v1/text-to-speech/pNInz6obpgDQGcFmaJgB', // Adam voice
-            {
-              method: 'POST',
-              headers: {
-                'Accept': 'audio/mpeg',
-                'Content-Type': 'application/json',
-                'xi-api-key': ELEVENLABS_API_KEY,
-              },
-              body: JSON.stringify({
-                text: text,
-                model_id: 'eleven_monolingual_v1',
-                voice_settings: {
-                  stability: 0.5,
-                  similarity_boost: 0.75,
-                  style: 0.0,
-                  use_speaker_boost: true
-                }
-              })
-            }
-          );
-
-          if (response.ok) {
-            const audioBlob = await response.blob();
+        // PRIORITY 1: Try loading pre-generated high-quality audio file
+        try {
+          const audioResponse = await fetch('/audio/visitor-conversion-guide.mp3');
+          if (audioResponse.ok) {
+            const audioBlob = await audioResponse.blob();
             const url = URL.createObjectURL(audioBlob);
             setAudioUrl(url);
             setIsLoading(false);
             return;
           }
+        } catch (err) {
+          console.log('Pre-generated audio not found, trying API...');
         }
 
-        // Fallback: Use Web Speech API with best available voice
+        // PRIORITY 2: Try ElevenLabs API with better settings
+        const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
+
+        if (ELEVENLABS_API_KEY) {
+          try {
+            // Using "Drew" - younger, more conversational male voice with better model
+            const response = await fetch(
+              'https://api.elevenlabs.io/v1/text-to-speech/29vD33N1CtxCmqQRPOHJ', // Drew voice
+              {
+                method: 'POST',
+                headers: {
+                  'Accept': 'audio/mpeg',
+                  'Content-Type': 'application/json',
+                  'xi-api-key': ELEVENLABS_API_KEY,
+                },
+                body: JSON.stringify({
+                  text: text,
+                  model_id: 'eleven_multilingual_v2', // More natural model
+                  voice_settings: {
+                    stability: 0.4, // Lower = more natural variation
+                    similarity_boost: 0.85, // Higher = more character
+                    style: 0.6, // More expressive and natural
+                    use_speaker_boost: true
+                  }
+                })
+              }
+            );
+
+            if (response.ok) {
+              const audioBlob = await response.blob();
+              const url = URL.createObjectURL(audioBlob);
+              setAudioUrl(url);
+              setIsLoading(false);
+              toast.success('Using premium natural voice!');
+              return;
+            }
+          } catch (apiError) {
+            console.error('ElevenLabs API error:', apiError);
+          }
+        }
+
+        // PRIORITY 3: Fallback to improved browser TTS
         useFallbackTTS();
       } catch (error) {
-        console.error('Audio generation error:', error);
+        console.error('Audio loading error:', error);
         useFallbackTTS();
       }
     };
@@ -69,20 +87,28 @@ export function AudioNarration({ text, autoPlay = false }: AudioNarrationProps) 
       // Use browser's Text-to-Speech as fallback
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.95;
-        utterance.pitch = 0.85;
+        utterance.rate = 0.92; // Slightly slower for clarity
+        utterance.pitch = 0.82; // Lower for masculine tone
         utterance.volume = 1;
 
-        // Try to find the best male voice
+        // Try to find the best male voice with improved selection
         const loadVoices = () => {
           const voices = window.speechSynthesis.getVoices();
+
+          // Priority order for most natural-sounding voices
           const maleVoice = voices.find(voice =>
-            (voice.name.includes('Male') || voice.name.includes('David') || voice.name.includes('Daniel')) &&
-            voice.lang.startsWith('en')
-          ) || voices.find(voice => voice.lang.startsWith('en-US'));
+            voice.name.includes('Daniel') && voice.lang.startsWith('en')
+          ) || voices.find(voice =>
+            voice.name.includes('David') && voice.lang.startsWith('en')
+          ) || voices.find(voice =>
+            (voice.name.includes('Male') || voice.name.includes('Tom')) && voice.lang.startsWith('en')
+          ) || voices.find(voice =>
+            voice.lang.startsWith('en-US')
+          );
 
           if (maleVoice) {
             utterance.voice = maleVoice;
+            console.log('Using voice:', maleVoice.name);
           }
         };
 
@@ -94,10 +120,11 @@ export function AudioNarration({ text, autoPlay = false }: AudioNarrationProps) 
 
         audioRef.current = utterance as any;
         setIsLoading(false);
+        toast.info('Using browser voice. For better quality, add audio file or API key.');
       }
     };
 
-    generateAudio();
+    loadAudio();
 
     return () => {
       if (audioUrl) {
@@ -287,7 +314,18 @@ export function AudioNarration({ text, autoPlay = false }: AudioNarrationProps) 
       {/* Info Badge */}
       {!audioUrl && !isLoading && (
         <div className="mt-3 text-xs text-gray-500 bg-white bg-opacity-60 rounded-lg px-3 py-2">
-          💡 Tip: For the best natural voice experience, add VITE_ELEVENLABS_API_KEY to your .env file
+          💡 <strong>Using browser voice.</strong> For premium natural voice:
+          <br/>• Run <code className="bg-gray-200 px-1 rounded">node scripts/generateAudio.js</code> to create audio file, OR
+          <br/>• Add VITE_ELEVENLABS_API_KEY to your .env.local file
+        </div>
+      )}
+
+      {audioUrl && (
+        <div className="mt-3 text-xs text-green-600 bg-green-50 rounded-lg px-3 py-2 flex items-center gap-2">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+          </svg>
+          ✨ <strong>Premium natural voice active!</strong> Sounds like a real person.
         </div>
       )}
     </div>
