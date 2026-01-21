@@ -22,6 +22,15 @@ export interface CaseStudy {
   results: string[];
 }
 
+export interface ImplementationStep {
+  number: number;
+  title: string;
+  description: string;
+  icon: string;
+  details?: string[];
+  tip?: string;
+}
+
 export interface Tool {
   id: string;
   title: string;
@@ -38,6 +47,8 @@ export interface Tool {
   actualTools?: ActualTool[];
   techniques?: Technique[];
   caseStudies?: CaseStudy[];
+  audioNarration?: string;
+  implementationSteps?: ImplementationStep[];
 }
 
 export interface Article {
@@ -66,6 +77,87 @@ export const problemTools: Tool[] = [
     category: "hvac",
     longDescription: "Deploy AI-powered chatbots on your website that engage visitors 24/7 and convert them into qualified leads. Perfect for HVAC businesses looking to capture more quotes.",
     benefits: ["24/7 availability", "Instant quote generation", "20% increase in conversions", "No coding required"],
+    audioNarration: "Hey there! Let me walk you through how to turn your website visitors into actual paying customers. Now, I know technology can seem complicated, but trust me, this is easier than changing an oil filter. First thing you're gonna do is pick your chatbot tool. I recommend starting with Tidio - it's like the reliable pickup truck of chatbots. Simple, gets the job done, and won't break the bank. Step two, you'll connect it to your website. It's literally just copying and pasting a piece of code - if you can copy your buddy's phone number, you can do this. Then comes the fun part - teaching your bot what to say. Think of it like training a new employee, but this one never calls in sick! Write out how you'd greet a customer walking into your shop. Keep it friendly, keep it real. 'Hey! Need help with something?' works way better than some fancy corporate speak. Next, set up your lead capture. This is where the magic happens. When someone asks about pricing or services, your bot asks for their name, phone number, and what they need. Boom - you got yourself a qualified lead while you were out fishing or sleeping. Finally, connect it to your phone or email so you get notified right away. Nothing fancy, just good old-fashioned follow-up, but automated. Remember, the goal here isn't to replace you - it's to catch the customers you'd miss when you're busy doing actual work. Set it up once, and it works for you 24-7. That's it! Now get out there and start capturing those leads!",
+    implementationSteps: [
+      {
+        number: 1,
+        title: "Choose Your Chatbot Tool",
+        description: "Pick a chatbot platform that fits your budget and technical skill level. For most small businesses, Tidio or Landbot are great starting points.",
+        icon: "🛠️",
+        details: [
+          "Sign up for a free trial with Tidio or your chosen platform",
+          "Verify your email and create your account",
+          "Choose the free or starter plan to begin",
+          "Familiarize yourself with the dashboard"
+        ],
+        tip: "Start with the free version to test it out. You can always upgrade once you see results!"
+      },
+      {
+        number: 2,
+        title: "Install on Your Website",
+        description: "Connect the chatbot to your website using a simple code snippet. It's as easy as copy and paste - no programming skills required!",
+        icon: "🔌",
+        details: [
+          "Find the installation code in your chatbot dashboard",
+          "Copy the code snippet provided",
+          "Paste it into your website's footer (or use a plugin if you're on WordPress)",
+          "Save changes and check that the chat widget appears on your site"
+        ],
+        tip: "If you're using WordPress, Shopify, or Wix, there's usually a one-click integration. Look for it in the plugins/apps section!"
+      },
+      {
+        number: 3,
+        title: "Create Your Welcome Message",
+        description: "Write a friendly greeting that makes visitors want to engage. Think about how you'd greet someone walking into your shop or calling your business.",
+        icon: "💬",
+        details: [
+          "Keep it short and friendly: 'Hey! Need help finding something?'",
+          "Add a quick value proposition: 'I can help you get a quote in under 2 minutes!'",
+          "Include a call-to-action button like 'Get a Quote' or 'Ask a Question'",
+          "Test it from a visitor's perspective"
+        ],
+        tip: "Avoid corporate jargon. Talk like a real person! 'What brings you here today?' beats 'How may I assist you?' every time."
+      },
+      {
+        number: 4,
+        title: "Set Up Lead Capture Questions",
+        description: "Configure the bot to collect essential information from interested visitors. This is how you turn conversations into actual leads in your CRM.",
+        icon: "📝",
+        details: [
+          "Ask for their name first (people like being addressed personally)",
+          "Request phone number or email (make it required)",
+          "Ask what service they're interested in (use buttons for common options)",
+          "Add a field for any specific details or questions they have"
+        ],
+        tip: "Don't ask for too much info! Just name, contact method, and what they need. You can get the rest when you follow up."
+      },
+      {
+        number: 5,
+        title: "Connect Notifications",
+        description: "Set up instant alerts so you know immediately when a hot lead comes in. The faster you respond, the higher your conversion rate!",
+        icon: "🔔",
+        details: [
+          "Enable email notifications in your chatbot settings",
+          "Add your mobile number for SMS alerts (highly recommended!)",
+          "Set up working hours if you only want notifications during business hours",
+          "Test it by filling out the form yourself"
+        ],
+        tip: "Responding within 5 minutes increases your chances of closing by 400%! Set up mobile notifications so you never miss a lead."
+      },
+      {
+        number: 6,
+        title: "Test and Optimize",
+        description: "Run through the entire customer journey yourself, then ask a friend or family member to try it. Make adjustments based on what works.",
+        icon: "🎯",
+        details: [
+          "Test the chatbot on different devices (phone, tablet, desktop)",
+          "Have someone else test it and give honest feedback",
+          "Check that all notifications are coming through properly",
+          "Monitor your first week of conversations and look for patterns"
+        ],
+        tip: "Check your chatbot stats weekly. If people are starting conversations but not completing the form, your questions might be too complicated!"
+      }
+    ],
     actualTools: [
       {
         name: "Intercom",

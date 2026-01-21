@@ -3,6 +3,8 @@ import { SocialShare } from "./SocialShare";
 import { ToolReviews } from "./ToolReviews";
 import { ROICalculator } from "./ROICalculator";
 import { ProgressTracker } from "./ProgressTracker";
+import { AudioNarration } from "./AudioNarration";
+import { VisualStepProcess } from "./VisualStepProcess";
 import { useState } from "react";
 
 interface ToolModalProps {
@@ -47,6 +49,19 @@ export function ToolModal({ tool, onClose, onGetStarted }: ToolModalProps) {
         </div>
 
         <div className="p-6 space-y-6">
+          {/* Audio Narration for Tool ID 1 */}
+          {tool.id === "1" && tool.audioNarration && (
+            <AudioNarration text={tool.audioNarration} />
+          )}
+
+          {/* Visual Step Process for Tool ID 1 */}
+          {tool.id === "1" && tool.implementationSteps && tool.implementationSteps.length > 0 && (
+            <VisualStepProcess
+              steps={tool.implementationSteps}
+              title="Step-by-Step Implementation Guide"
+            />
+          )}
+
           {tool.longDescription && (
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">About</h3>
