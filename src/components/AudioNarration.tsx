@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { toast } from "sonner";
 
 interface AudioNarrationProps {
   text: string;
@@ -7,124 +8,190 @@ interface AudioNarrationProps {
 
 export function AudioNarration({ text, autoPlay = false }: AudioNarrationProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Generate audio using ElevenLabs API (or fallback to browser TTS)
   useEffect(() => {
-    // Initialize speech synthesis
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
+    const generateAudio = async () => {
+      try {
+        setIsLoading(true);
 
-      // Configure voice for friendly blue collar tone
-      utterance.rate = 0.9; // Slightly slower for clear communication
-      utterance.pitch = 0.9; // Slightly lower pitch for masculine, friendly tone
-      utterance.volume = 1;
+        // Try ElevenLabs API first for natural voice
+        // Using a free voice ID for "Adam" - a natural male voice
+        const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
 
-      // Try to find a male US English voice
-      const voices = window.speechSynthesis.getVoices();
-      const preferredVoice = voices.find(voice =>
-        voice.lang.startsWith('en-US') && voice.name.includes('Male')
-      ) || voices.find(voice =>
-        voice.lang.startsWith('en')
-      );
+        if (ELEVENLABS_API_KEY) {
+          // ElevenLabs API - Natural human voice
+          const response = await fetch(
+            'https://api.elevenlabs.io/v1/text-to-speech/pNInz6obpgDQGcFmaJgB', // Adam voice
+            {
+              method: 'POST',
+              headers: {
+                'Accept': 'audio/mpeg',
+                'Content-Type': 'application/json',
+                'xi-api-key': ELEVENLABS_API_KEY,
+              },
+              body: JSON.stringify({
+                text: text,
+                model_id: 'eleven_monolingual_v1',
+                voice_settings: {
+                  stability: 0.5,
+                  similarity_boost: 0.75,
+                  style: 0.0,
+                  use_speaker_boost: true
+                }
+              })
+            }
+          );
 
-      if (preferredVoice) {
-        utterance.voice = preferredVoice;
+          if (response.ok) {
+            const audioBlob = await response.blob();
+            const url = URL.createObjectURL(audioBlob);
+            setAudioUrl(url);
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // Fallback: Use Web Speech API with best available voice
+        useFallbackTTS();
+      } catch (error) {
+        console.error('Audio generation error:', error);
+        useFallbackTTS();
       }
+    };
 
-      utterance.onstart = () => {
-        setIsPlaying(true);
-        setIsPaused(false);
-      };
+    const useFallbackTTS = () => {
+      // Use browser's Text-to-Speech as fallback
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.95;
+        utterance.pitch = 0.85;
+        utterance.volume = 1;
 
-      utterance.onend = () => {
+        // Try to find the best male voice
+        const loadVoices = () => {
+          const voices = window.speechSynthesis.getVoices();
+          const maleVoice = voices.find(voice =>
+            (voice.name.includes('Male') || voice.name.includes('David') || voice.name.includes('Daniel')) &&
+            voice.lang.startsWith('en')
+          ) || voices.find(voice => voice.lang.startsWith('en-US'));
+
+          if (maleVoice) {
+            utterance.voice = maleVoice;
+          }
+        };
+
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+
+        utterance.onstart = () => setIsPlaying(true);
+        utterance.onend = () => setIsPlaying(false);
+
+        audioRef.current = utterance as any;
+        setIsLoading(false);
+      }
+    };
+
+    generateAudio();
+
+    return () => {
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, [text]);
+
+  // Setup audio element when URL is ready
+  useEffect(() => {
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+
+      audio.addEventListener('loadedmetadata', () => {
+        setDuration(audio.duration);
+      });
+
+      audio.addEventListener('timeupdate', () => {
+        setCurrentTime(audio.currentTime);
+      });
+
+      audio.addEventListener('ended', () => {
         setIsPlaying(false);
-        setIsPaused(false);
-      };
+        setCurrentTime(0);
+      });
 
-      utterance.onpause = () => {
-        setIsPaused(true);
-      };
+      audio.addEventListener('play', () => setIsPlaying(true));
+      audio.addEventListener('pause', () => setIsPlaying(false));
 
-      utterance.onresume = () => {
-        setIsPaused(false);
-      };
+      audioRef.current = audio;
 
-      utteranceRef.current = utterance;
-
-      // Auto-play if requested
-      if (autoPlay && !isPlaying) {
-        window.speechSynthesis.speak(utterance);
+      if (autoPlay) {
+        audio.play().catch(err => {
+          console.error('Autoplay failed:', err);
+          toast.error('Click Play to start audio');
+        });
       }
 
       return () => {
-        if (window.speechSynthesis.speaking) {
-          window.speechSynthesis.cancel();
-        }
+        audio.pause();
+        audio.src = '';
       };
     }
-  }, [text, autoPlay]);
-
-  // Load voices when they're available
-  useEffect(() => {
-    if ('speechSynthesis' in window) {
-      const loadVoices = () => {
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0 && utteranceRef.current) {
-          const preferredVoice = voices.find(voice =>
-            voice.lang.startsWith('en-US') && voice.name.includes('Male')
-          ) || voices.find(voice =>
-            voice.lang.startsWith('en')
-          );
-
-          if (preferredVoice && utteranceRef.current) {
-            utteranceRef.current.voice = preferredVoice;
-          }
-        }
-      };
-
-      loadVoices();
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
-  }, []);
+  }, [audioUrl, autoPlay]);
 
   const handlePlay = () => {
-    if (!utteranceRef.current) return;
-
-    if (isPaused) {
-      window.speechSynthesis.resume();
-    } else {
+    if (audioRef.current instanceof HTMLAudioElement) {
+      audioRef.current.play();
+    } else if (audioRef.current) {
+      // Fallback TTS
       window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utteranceRef.current);
+      window.speechSynthesis.speak(audioRef.current as any);
     }
   };
 
   const handlePause = () => {
-    window.speechSynthesis.pause();
+    if (audioRef.current instanceof HTMLAudioElement) {
+      audioRef.current.pause();
+    } else {
+      window.speechSynthesis.pause();
+    }
   };
 
   const handleStop = () => {
-    window.speechSynthesis.cancel();
+    if (audioRef.current instanceof HTMLAudioElement) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setCurrentTime(0);
+    } else {
+      window.speechSynthesis.cancel();
+    }
     setIsPlaying(false);
-    setIsPaused(false);
   };
 
-  if (!('speechSynthesis' in window)) {
-    return null;
-  }
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-6 mb-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="bg-blue-600 rounded-full p-3">
             <svg
-              className={`w-6 h-6 text-white ${isPlaying && !isPaused ? 'animate-pulse' : ''}`}
+              className={`w-6 h-6 text-white ${isPlaying ? 'animate-pulse' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              {isPlaying && !isPaused ? (
+              {isPlaying ? (
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -143,12 +210,22 @@ export function AudioNarration({ text, autoPlay = false }: AudioNarrationProps) 
           </div>
           <div>
             <h4 className="text-lg font-bold text-gray-900">🎙️ Audio Guide</h4>
-            <p className="text-sm text-gray-600">Listen to a friendly walkthrough</p>
+            <p className="text-sm text-gray-600">
+              {audioUrl ? 'Natural human voice walkthrough' : 'Listen to a friendly walkthrough'}
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {!isPlaying || isPaused ? (
+          {isLoading ? (
+            <div className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-600 rounded-lg">
+              <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+              </svg>
+              Loading...
+            </div>
+          ) : !isPlaying ? (
             <button
               onClick={handlePlay}
               className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-md hover:shadow-lg"
@@ -156,40 +233,61 @@ export function AudioNarration({ text, autoPlay = false }: AudioNarrationProps) 
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z"/>
               </svg>
-              {isPaused ? 'Resume' : 'Play'}
+              Play
             </button>
           ) : (
-            <button
-              onClick={handlePause}
-              className="flex items-center gap-2 px-5 py-2.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-all font-semibold shadow-md hover:shadow-lg"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-              </svg>
-              Pause
-            </button>
-          )}
-
-          {isPlaying && (
-            <button
-              onClick={handleStop}
-              className="flex items-center gap-2 px-5 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all font-semibold shadow-md hover:shadow-lg"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6 6h12v12H6z"/>
-              </svg>
-              Stop
-            </button>
+            <>
+              <button
+                onClick={handlePause}
+                className="flex items-center gap-2 px-5 py-2.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-all font-semibold shadow-md hover:shadow-lg"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                </svg>
+                Pause
+              </button>
+              <button
+                onClick={handleStop}
+                className="flex items-center gap-2 px-5 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all font-semibold shadow-md hover:shadow-lg"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 6h12v12H6z"/>
+                </svg>
+                Stop
+              </button>
+            </>
           )}
         </div>
       </div>
 
-      {isPlaying && (
-        <div className="mt-4 flex items-center gap-2">
-          <div className="flex-1 h-1 bg-blue-200 rounded-full overflow-hidden">
-            <div className="h-full bg-blue-600 rounded-full animate-progress" style={{ width: '100%' }}></div>
+      {/* Progress Bar */}
+      {(isPlaying || currentTime > 0) && duration > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-600 font-mono w-12">{formatTime(currentTime)}</span>
+            <div className="flex-1 h-2 bg-blue-200 rounded-full overflow-hidden cursor-pointer"
+              onClick={(e) => {
+                if (audioRef.current instanceof HTMLAudioElement && duration > 0) {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const percent = (e.clientX - rect.left) / rect.width;
+                  audioRef.current.currentTime = percent * duration;
+                }
+              }}
+            >
+              <div
+                className="h-full bg-blue-600 rounded-full transition-all"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <span className="text-xs text-gray-600 font-mono w-12">{formatTime(duration)}</span>
           </div>
-          <span className="text-xs text-gray-600 font-mono">Playing...</span>
+        </div>
+      )}
+
+      {/* Info Badge */}
+      {!audioUrl && !isLoading && (
+        <div className="mt-3 text-xs text-gray-500 bg-white bg-opacity-60 rounded-lg px-3 py-2">
+          💡 Tip: For the best natural voice experience, add VITE_ELEVENLABS_API_KEY to your .env file
         </div>
       )}
     </div>
