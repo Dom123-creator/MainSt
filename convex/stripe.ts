@@ -1,9 +1,18 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
+import Stripe from "stripe";
 
-// Note: In production, install Stripe with: npm install stripe
-// For now, this provides the structure
+// Initialize Stripe with your secret key
+const getStripe = () => {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error("STRIPE_SECRET_KEY is not set in environment variables");
+  }
+  return new Stripe(secretKey, {
+    apiVersion: "2025-12-15.clover",
+  });
+};
 
 // Create Stripe Checkout Session
 export const createCheckoutSession = action({
@@ -19,35 +28,32 @@ export const createCheckoutSession = action({
     const userId = identity.subject;
     const email = identity.email;
 
-    // In production, you would initialize Stripe here:
-    // const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+    const stripe = getStripe();
 
     try {
-      // Example Stripe checkout session creation
-      // const session = await stripe.checkout.sessions.create({
-      //   customer_email: email,
-      //   client_reference_id: userId,
-      //   line_items: [{
-      //     price: args.priceId,
-      //     quantity: 1,
-      //   }],
-      //   mode: 'subscription',
-      //   success_url: args.successUrl,
-      //   cancel_url: args.cancelUrl,
-      //   metadata: {
-      //     userId: userId,
-      //   },
-      // });
+      const session = await stripe.checkout.sessions.create({
+        customer_email: email,
+        client_reference_id: userId,
+        line_items: [{
+          price: args.priceId,
+          quantity: 1,
+        }],
+        mode: 'subscription',
+        success_url: args.successUrl,
+        cancel_url: args.cancelUrl,
+        metadata: {
+          userId: userId,
+        },
+      });
 
-      // For now, return mock data
       return {
         success: true,
-        sessionId: "mock_session_" + Date.now(),
-        url: args.successUrl, // In production: session.url
+        sessionId: session.id,
+        url: session.url,
       };
     } catch (error: any) {
       console.error("Stripe checkout error:", error);
-      throw new Error("Failed to create checkout session");
+      throw new Error("Failed to create checkout session: " + error.message);
     }
   },
 });
@@ -57,30 +63,35 @@ export const createPortalSession = action({
   args: {
     returnUrl: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{ success: boolean; url: string | null }> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
     const userId = identity.subject as any;
 
     // Get user's subscription
-    const subscription = await ctx.runQuery(api.reviewsAndSubscriptions.getUserSubscription);
+    const subscription: any = await ctx.runQuery(api.reviewsAndSubscriptions.getUserSubscription);
 
     if (!subscription?.stripeCustomerId) {
       throw new Error("No Stripe customer found");
     }
 
-    // In production:
-    // const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-    // const session = await stripe.billingPortal.sessions.create({
-    //   customer: subscription.stripeCustomerId,
-    //   return_url: args.returnUrl,
-    // });
+    const stripe = getStripe();
 
-    return {
-      success: true,
-      url: args.returnUrl, // In production: session.url
-    };
+    try {
+      const session: any = await stripe.billingPortal.sessions.create({
+        customer: subscription.stripeCustomerId,
+        return_url: args.returnUrl,
+      });
+
+      return {
+        success: true,
+        url: session.url,
+      };
+    } catch (error: any) {
+      console.error("Stripe portal error:", error);
+      throw new Error("Failed to create portal session: " + error.message);
+    }
   },
 });
 
@@ -123,21 +134,23 @@ export const verifyWebhookSignature = action({
     signature: v.string(),
   },
   handler: async (ctx, args) => {
-    // In production:
-    // const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-    // const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    //
-    // try {
-    //   const event = stripe.webhooks.constructEvent(
-    //     args.payload,
-    //     args.signature,
-    //     webhookSecret
-    //   );
-    //   return { valid: true, event };
-    // } catch (err) {
-    //   return { valid: false };
-    // }
+    const stripe = getStripe();
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-    return { valid: true, event: JSON.parse(args.payload) };
+    if (!webhookSecret) {
+      throw new Error("STRIPE_WEBHOOK_SECRET is not set in environment variables");
+    }
+
+    try {
+      const event = stripe.webhooks.constructEvent(
+        args.payload,
+        args.signature,
+        webhookSecret
+      );
+      return { valid: true, event };
+    } catch (err: any) {
+      console.error("Webhook signature verification failed:", err.message);
+      return { valid: false, error: err.message };
+    }
   },
 });

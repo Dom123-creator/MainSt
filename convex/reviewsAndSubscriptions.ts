@@ -247,3 +247,65 @@ export const getActiveSubscriptionsCount = query({
     return subscriptions.length;
   },
 });
+
+// Update subscription by Stripe subscription ID (for webhooks)
+export const updateSubscriptionByStripeId = mutation({
+  args: {
+    stripeSubscriptionId: v.string(),
+    status: v.optional(v.string()),
+    currentPeriodStart: v.optional(v.number()),
+    currentPeriodEnd: v.optional(v.number()),
+    cancelAtPeriodEnd: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    // Find subscription by Stripe subscription ID
+    const subscription = await ctx.db
+      .query("subscriptions")
+      .filter((q) => q.eq(q.field("stripeSubscriptionId"), args.stripeSubscriptionId))
+      .first();
+
+    if (!subscription) {
+      throw new Error("Subscription not found");
+    }
+
+    // Update subscription with provided fields
+    const updates: any = {
+      updatedAt: Date.now(),
+    };
+
+    if (args.status !== undefined) updates.status = args.status;
+    if (args.currentPeriodStart !== undefined) updates.currentPeriodStart = args.currentPeriodStart;
+    if (args.currentPeriodEnd !== undefined) updates.currentPeriodEnd = args.currentPeriodEnd;
+    if (args.cancelAtPeriodEnd !== undefined) updates.cancelAtPeriodEnd = args.cancelAtPeriodEnd;
+
+    await ctx.db.patch(subscription._id, updates);
+
+    return { success: true, id: subscription._id };
+  },
+});
+
+// Delete/cancel subscription by Stripe subscription ID (for webhooks)
+export const deleteSubscriptionByStripeId = mutation({
+  args: {
+    stripeSubscriptionId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const subscription = await ctx.db
+      .query("subscriptions")
+      .filter((q) => q.eq(q.field("stripeSubscriptionId"), args.stripeSubscriptionId))
+      .first();
+
+    if (!subscription) {
+      throw new Error("Subscription not found");
+    }
+
+    // Mark as cancelled instead of deleting
+    await ctx.db.patch(subscription._id, {
+      status: "cancelled",
+      cancelAtPeriodEnd: true,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});

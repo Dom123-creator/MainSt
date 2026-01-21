@@ -16,7 +16,9 @@ import type {
 import type * as articles from "../articles.js";
 import type * as auth from "../auth.js";
 import type * as categories from "../categories.js";
+import type * as chimoney from "../chimoney.js";
 import type * as http from "../http.js";
+import type * as payments from "../payments.js";
 import type * as reviewsAndSubscriptions from "../reviewsAndSubscriptions.js";
 import type * as router from "../router.js";
 import type * as seedData from "../seedData.js";
@@ -37,7 +39,9 @@ declare const fullApi: ApiFromModules<{
   articles: typeof articles;
   auth: typeof auth;
   categories: typeof categories;
+  chimoney: typeof chimoney;
   http: typeof http;
+  payments: typeof payments;
   reviewsAndSubscriptions: typeof reviewsAndSubscriptions;
   router: typeof router;
   seedData: typeof seedData;
