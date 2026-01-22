@@ -82,14 +82,14 @@ If you don't add an ElevenLabs API key, the component automatically falls back t
 
 ## Voice Characteristics
 
-### ElevenLabs Voice (Drew)
-- **Age**: Mid-30s
-- **Tone**: Ultra-relaxed, conversational, natural
+### ElevenLabs Voice (Daniel)
+- **Type**: Steady Broadcaster
+- **Tone**: Professional, authoritative, steady and consistent
 - **Accent**: American English
-- **Style**: Friendly coworker explaining tech simply
+- **Style**: Clear, confident narrator with broadcaster quality
 - **Model**: Multilingual V2 (most natural model)
-- **Quality**: Studio-quality, sounds exactly like a real person
-- **Settings**: Low stability (0.4), high expressiveness (0.6)
+- **Quality**: Studio-quality, professional broadcasting tone
+- **Settings**: Higher stability (0.65), balanced clarity (0.80), moderate expressiveness (0.45)
 
 ### Browser TTS Fallback
 - **Voice**: Best available male voice on your system
@@ -143,8 +143,8 @@ If you don't add an ElevenLabs API key, the component automatically falls back t
 
 ### API Used
 - **Primary**: ElevenLabs Text-to-Speech API v1
-- **Voice ID**: `pNInz6obpgDQGcFmaJgB` (Adam)
-- **Model**: `eleven_monolingual_v1`
+- **Voice ID**: `onwK4e9ZLuTAKqWW03F9` (Daniel - Steady Broadcaster)
+- **Model**: `eleven_multilingual_v2`
 - **Fallback**: Web Speech API
 
 ### Environment Variable

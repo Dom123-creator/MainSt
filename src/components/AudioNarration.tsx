@@ -39,9 +39,9 @@ export function AudioNarration({ text, autoPlay = false }: AudioNarrationProps) 
 
         if (ELEVENLABS_API_KEY) {
           try {
-            // Using "Drew" - younger, more conversational male voice with better model
+            // Using "Daniel" - steady broadcaster voice for professional, authoritative tone
             const response = await fetch(
-              'https://api.elevenlabs.io/v1/text-to-speech/29vD33N1CtxCmqQRPOHJ', // Drew voice
+              'https://api.elevenlabs.io/v1/text-to-speech/onwK4e9ZLuTAKqWW03F9', // Daniel voice
               {
                 method: 'POST',
                 headers: {
@@ -53,9 +53,9 @@ export function AudioNarration({ text, autoPlay = false }: AudioNarrationProps) 
                   text: text,
                   model_id: 'eleven_multilingual_v2', // More natural model
                   voice_settings: {
-                    stability: 0.4, // Lower = more natural variation
-                    similarity_boost: 0.85, // Higher = more character
-                    style: 0.6, // More expressive and natural
+                    stability: 0.65, // Higher for steady, consistent broadcaster tone
+                    similarity_boost: 0.80, // Good balance for natural clarity
+                    style: 0.45, // Moderate expressiveness for professional delivery
                     use_speaker_boost: true
                   }
                 })
