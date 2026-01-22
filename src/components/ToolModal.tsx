@@ -49,13 +49,13 @@ export function ToolModal({ tool, onClose, onGetStarted }: ToolModalProps) {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Audio Narration for Tool ID 1 */}
-          {tool.id === "1" && tool.audioNarration && (
+          {/* Audio Narration for ALL Tools */}
+          {tool.audioNarration && (
             <AudioNarration text={tool.audioNarration} />
           )}
 
-          {/* Visual Step Process for Tool ID 1 */}
-          {tool.id === "1" && tool.implementationSteps && tool.implementationSteps.length > 0 && (
+          {/* Visual Step Process for ALL Tools */}
+          {tool.implementationSteps && tool.implementationSteps.length > 0 && (
             <VisualStepProcess
               steps={tool.implementationSteps}
               title="Step-by-Step Implementation Guide"
